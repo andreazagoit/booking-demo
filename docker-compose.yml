@@ -1,0 +1,55 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: booking-demo-frontend
+    container_name: booking-demo-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - BETTER_AUTH_SECRET=demo-secret-key-32-chars-minimum!!
+      - BETTER_AUTH_URL=http://localhost:3000
+      - NEXT_PUBLIC_GRAPHQL_URL=http://localhost:3000/api/graphql
+      - DYNAMODB_ENDPOINT=http://dynamodb:8000
+    depends_on:
+      - dynamodb
+    restart: unless-stopped
+    profiles:
+      - prod
+
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    image: booking-demo-frontend-dev
+    container_name: booking-demo-frontend-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - BETTER_AUTH_SECRET=demo-secret-key-32-chars-minimum!!
+      - BETTER_AUTH_URL=http://localhost:3000
+      - NEXT_PUBLIC_GRAPHQL_URL=http://localhost:3000/api/graphql
+      - DYNAMODB_ENDPOINT=http://dynamodb:8000
+    depends_on:
+      - dynamodb
+    profiles:
+      - dev
+
+  dynamodb:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    image: booking-demo-dynamodb
+    container_name: booking-demo-dynamodb
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+volumes: {}
