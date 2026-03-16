@@ -1,0 +1,73 @@
+# This file is used only by GraphQL Codegen to expose the full schema SDL
+
+type User {
+  id: ID!
+  email: String!
+  name: String
+  createdAt: String!
+}
+
+type Property {
+  id: ID!
+  userId: String!
+  name: String!
+  description: String
+  location: String
+  imageUrl: String
+  pricePerNight: Float
+  createdAt: String!
+}
+
+enum BookingStatus {
+  CONFIRMED
+  PENDING
+  CANCELLED
+}
+
+type Booking {
+  id: ID!
+  checkIn: String!
+  checkOut: String!
+  status: BookingStatus!
+  totalAmount: Float!
+  createdAt: String!
+  property: Property
+  user: User
+}
+
+type BookedRange {
+  checkIn: String!
+  checkOut: String!
+}
+
+type Query {
+  me: User
+  properties: [Property!]!
+  property(id: String!): Property
+  myProperties: [Property!]!
+  myBookings: [Booking!]!
+  ownerBookings: [Booking!]!
+  propertyBookedRanges(propertyId: String!): [BookedRange!]!
+  propertyBookings(propertyId: String!): [Booking!]!
+}
+
+type Mutation {
+  createProperty(
+    name: String!
+    description: String
+    location: String
+    imageUrl: String
+    pricePerNight: Float
+  ): Property!
+
+  createBooking(
+    propertyId: String!
+    checkIn: String!
+    checkOut: String!
+  ): Booking!
+
+  updateBookingStatus(
+    id: String!
+    status: BookingStatus!
+  ): Booking!
+}
