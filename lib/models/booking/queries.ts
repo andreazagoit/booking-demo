@@ -9,6 +9,39 @@ export const GET_PROPERTY_BOOKED_RANGES = gql(`
   }
 `)
 
+export const GET_BOOKINGS = gql(`
+  query GetBookings($first: Int, $after: String, $from: String, $to: String, $status: BookingStatus) {
+    bookings(first: $first, after: $after, from: $from, to: $to, status: $status) {
+      edges {
+        cursor
+        node {
+          id
+          checkIn
+          checkOut
+          status
+          totalAmount
+          createdAt
+          user {
+            id
+            name
+            email
+          }
+          property {
+            id
+            name
+            location
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+    }
+  }
+`)
+
 // Fragment for owner: property card with all bookings nested
 export const OWNER_PROPERTY_FIELDS = gql(`
   fragment OwnerPropertyFields on Property {

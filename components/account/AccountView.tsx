@@ -5,9 +5,13 @@ import { useQuery, useMutation } from "@apollo/client/react"
 import { GET_MY_PROPERTIES, CREATE_PROPERTY } from "@/lib/models/property/queries"
 import { GET_MY_BOOKINGS } from "@/lib/models/booking/queries"
 import type { GetMyPropertiesQuery, GetMyBookingsQuery } from "@/gql/graphql"
+import { BookingStatus } from "@/gql/graphql"
 import Link from "next/link"
 import { Container } from "@/components/ui/container"
 import { OwnerPropertyCard } from "@/components/properties/OwnerPropertyCard"
+import { BookingsTable } from "@/components/bookings/BookingsTable"
+import { BookingsFilters } from "@/components/bookings/BookingsFilters"
+import { useBookings } from "@/hooks/useBookings"
 import { signOut } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import dayjs from "dayjs"
@@ -161,11 +165,33 @@ export function AccountView({ userName, userEmail, initialProperties, initialBoo
   const router = useRouter()
   const [showModal, setShowModal] = useState(false)
 
+  // Filters state for owner bookings dashboard
+  const [filterFrom, setFilterFrom] = useState("")
+  const [filterTo, setFilterTo] = useState("")
+  const [filterStatus, setFilterStatus] = useState<BookingStatus | "">("")
+
   const { data: propData, refetch } = useQuery(GET_MY_PROPERTIES, { fetchPolicy: "cache-and-network" })
   const { data: bookData } = useQuery(GET_MY_BOOKINGS, { fetchPolicy: "cache-and-network" })
 
   const properties: Property[] = propData?.myProperties ?? initialProperties
   const guestBookings: GuestBooking[] = bookData?.myBookings ?? initialBookings
+  const isOwner = properties.length > 0
+
+  const {
+    bookings: ownerBookings,
+    loading: ownerBookingsLoading,
+    hasNextPage,
+    loadMore,
+    refetch: refetchOwnerBookings,
+    totalCount,
+  } = useBookings(
+    {
+      from: filterFrom || undefined,
+      to: filterTo || undefined,
+      status: filterStatus || undefined,
+    },
+    50
+  )
 
   return (
     <Container className="py-10 space-y-12">
@@ -221,6 +247,47 @@ export function AccountView({ userName, userEmail, initialProperties, initialBoo
           </div>
         )}
       </section>
+
+      {/* ── DASHBOARD PRENOTAZIONI (owner only) ── */}
+      {isOwner && (
+        <section className="space-y-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight">Dashboard prenotazioni</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {ownerBookingsLoading ? "Caricamento..." : `${totalCount} prenotazion${totalCount === 1 ? "e" : "i"} totali`}
+              </p>
+            </div>
+          </div>
+
+          <BookingsFilters
+            from={filterFrom}
+            to={filterTo}
+            status={filterStatus}
+            onFromChange={setFilterFrom}
+            onToChange={setFilterTo}
+            onStatusChange={setFilterStatus}
+          />
+
+          <BookingsTable
+            bookings={ownerBookings}
+            loading={ownerBookingsLoading}
+            onRefetch={refetchOwnerBookings}
+          />
+
+          {hasNextPage && (
+            <div className="flex justify-center pt-2">
+              <button
+                onClick={loadMore}
+                disabled={ownerBookingsLoading}
+                className="rounded-lg border border-border px-5 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+              >
+                Carica altre prenotazioni
+              </button>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* ── LE MIE PRENOTAZIONI ── */}
       <section className="space-y-4">

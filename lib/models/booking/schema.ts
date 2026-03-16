@@ -21,11 +21,34 @@ export const bookingTypeDefs = `#graphql
     checkOut: String!
   }
 
+  type PageInfo {
+    hasNextPage: Boolean!
+    endCursor: String
+  }
+
+  type BookingEdge {
+    node: Booking!
+    cursor: String!
+  }
+
+  type BookingConnection {
+    edges: [BookingEdge!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+  }
+
   type Query {
     myBookings: [Booking!]!
     ownerBookings: [Booking!]!
     propertyBookedRanges(propertyId: String!): [BookedRange!]!
     propertyBookings(propertyId: String!): [Booking!]!
+    bookings(
+      first: Int
+      after: String
+      from: String
+      to: String
+      status: BookingStatus
+    ): BookingConnection!
   }
 
   type Mutation {

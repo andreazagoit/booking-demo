@@ -29,6 +29,7 @@ type Documents = {
     "\n  query GetMyProperties {\n    myProperties {\n      ...OwnerPropertyFields\n    }\n  }\n": typeof types.GetMyPropertiesDocument,
     "\n  mutation CreateProperty(\n    $name: String!\n    $description: String\n    $location: String\n    $imageUrl: String\n    $pricePerNight: Float\n  ) {\n    createProperty(\n      name: $name\n      description: $description\n      location: $location\n      imageUrl: $imageUrl\n      pricePerNight: $pricePerNight\n    ) {\n      id\n      name\n      description\n      location\n      imageUrl\n      pricePerNight\n      createdAt\n    }\n  }\n": typeof types.CreatePropertyDocument,
     "\n  query GetMe {\n    me {\n      id\n      email\n      name\n      createdAt\n    }\n  }\n": typeof types.GetMeDocument,
+    "\n  query GetBookings($first: Int, $after: String, $from: String, $to: String, $status: BookingStatus) {\n    bookings(first: $first, after: $after, from: $from, to: $to, status: $status) {\n      edges {\n        cursor\n        node {\n          id\n          checkIn\n          checkOut\n          status\n          totalAmount\n          createdAt\n          user {\n            id\n            name\n            email\n          }\n          property {\n            id\n            name\n            location\n          }\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n      totalCount\n    }\n  }\n": typeof types.GetBookingsDocument,
 };
 const documents: Documents = {
     "\n  query GetPropertyBookedRanges($propertyId: String!) {\n    propertyBookedRanges(propertyId: $propertyId) {\n      checkIn\n      checkOut\n    }\n  }\n": types.GetPropertyBookedRangesDocument,
@@ -46,6 +47,7 @@ const documents: Documents = {
     "\n  query GetMyProperties {\n    myProperties {\n      ...OwnerPropertyFields\n    }\n  }\n": types.GetMyPropertiesDocument,
     "\n  mutation CreateProperty(\n    $name: String!\n    $description: String\n    $location: String\n    $imageUrl: String\n    $pricePerNight: Float\n  ) {\n    createProperty(\n      name: $name\n      description: $description\n      location: $location\n      imageUrl: $imageUrl\n      pricePerNight: $pricePerNight\n    ) {\n      id\n      name\n      description\n      location\n      imageUrl\n      pricePerNight\n      createdAt\n    }\n  }\n": types.CreatePropertyDocument,
     "\n  query GetMe {\n    me {\n      id\n      email\n      name\n      createdAt\n    }\n  }\n": types.GetMeDocument,
+    "\n  query GetBookings($first: Int, $after: String, $from: String, $to: String, $status: BookingStatus) {\n    bookings(first: $first, after: $after, from: $from, to: $to, status: $status) {\n      edges {\n        cursor\n        node {\n          id\n          checkIn\n          checkOut\n          status\n          totalAmount\n          createdAt\n          user {\n            id\n            name\n            email\n          }\n          property {\n            id\n            name\n            location\n          }\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n      totalCount\n    }\n  }\n": types.GetBookingsDocument,
 };
 
 /**
@@ -122,6 +124,10 @@ export function gql(source: "\n  mutation CreateProperty(\n    $name: String!\n 
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  query GetMe {\n    me {\n      id\n      email\n      name\n      createdAt\n    }\n  }\n"): (typeof documents)["\n  query GetMe {\n    me {\n      id\n      email\n      name\n      createdAt\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  query GetBookings($first: Int, $after: String, $from: String, $to: String, $status: BookingStatus) {\n    bookings(first: $first, after: $after, from: $from, to: $to, status: $status) {\n      edges {\n        cursor\n        node {\n          id\n          checkIn\n          checkOut\n          status\n          totalAmount\n          createdAt\n          user {\n            id\n            name\n            email\n          }\n          property {\n            id\n            name\n            location\n          }\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n      totalCount\n    }\n  }\n"): (typeof documents)["\n  query GetBookings($first: Int, $after: String, $from: String, $to: String, $status: BookingStatus) {\n    bookings(first: $first, after: $after, from: $from, to: $to, status: $status) {\n      edges {\n        cursor\n        node {\n          id\n          checkIn\n          checkOut\n          status\n          totalAmount\n          createdAt\n          user {\n            id\n            name\n            email\n          }\n          property {\n            id\n            name\n            location\n          }\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n      totalCount\n    }\n  }\n"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};

@@ -129,6 +129,63 @@ export async function dbGetPropertyBookedRanges(propertyId: string): Promise<{ c
   return (result.Items ?? []) as { checkIn: string; checkOut: string }[]
 }
 
+export interface BookingConnectionResult {
+  edges: { node: BookingItem; cursor: string }[]
+  pageInfo: { hasNextPage: boolean; endCursor: string | null }
+  totalCount: number
+}
+
+export interface BookingsQueryArgs {
+  first?: number | null
+  after?: string | null
+  from?: string | null
+  to?: string | null
+  status?: BookingStatus | null
+  ownerId: string
+}
+
+export async function dbGetBookingsPaginated(args: BookingsQueryArgs): Promise<BookingConnectionResult> {
+  const { first = 50, after, from, to, status, ownerId } = args
+  const pageSize = Math.min(first ?? 50, 200)
+
+  // Fetch all bookings for the owner (across all properties)
+  const all = await dbGetOwnerBookings(ownerId)
+
+  // Apply filters server-side on the sorted array
+  const filtered = all.filter((b) => {
+    if (from && b.checkOut < from) return false
+    if (to && b.checkIn > to) return false
+    if (status && b.status !== status) return false
+    return true
+  })
+
+  const totalCount = filtered.length
+
+  // Cursor is a base64-encoded index into the sorted array
+  let startIndex = 0
+  if (after) {
+    const decoded = parseInt(Buffer.from(after, "base64").toString("utf8"), 10)
+    if (!isNaN(decoded)) startIndex = decoded + 1
+  }
+
+  const page = filtered.slice(startIndex, startIndex + pageSize)
+  const hasNextPage = startIndex + pageSize < filtered.length
+
+  const edges = page.map((node, i) => ({
+    node,
+    cursor: Buffer.from(String(startIndex + i), "utf8").toString("base64"),
+  }))
+
+  return {
+    edges,
+    pageInfo: {
+      hasNextPage,
+      endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
+    },
+    totalCount,
+  }
+}
+
 export async function dbUpdateBookingStatus(id: string, status: BookingStatus): Promise<BookingItem> {
   const result = await docClient.send(
     new UpdateCommand({

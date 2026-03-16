@@ -7,6 +7,7 @@ import {
   dbGetPropertyBookings,
   dbGetMyBookings,
   dbGetOwnerBookings,
+  dbGetBookingsPaginated,
   type BookingStatus,
 } from "./operations"
 
@@ -27,6 +28,14 @@ interface BookingRecord {
   createdAt: string
 }
 
+interface BookingsArgs {
+  first?: number | null
+  after?: string | null
+  from?: string | null
+  to?: string | null
+  status?: BookingStatus | null
+}
+
 export const bookingResolvers = {
   Query: {
     propertyBookedRanges: (_: unknown, { propertyId }: { propertyId: string }) => {
@@ -43,6 +52,10 @@ export const bookingResolvers = {
     ownerBookings: (_: unknown, __: unknown, context: GraphQLContext) => {
       const user = requireAuth(context)
       return dbGetOwnerBookings(user.id)
+    },
+    bookings: (_: unknown, args: BookingsArgs, context: GraphQLContext) => {
+      const user = requireAuth(context)
+      return dbGetBookingsPaginated({ ...args, ownerId: user.id })
     },
   },
 

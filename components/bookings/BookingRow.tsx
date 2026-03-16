@@ -45,9 +45,9 @@ export function BookingRow({ booking, onStatusChange }: BookingRowProps) {
 
   return (
     <tr className="border-b border-border hover:bg-muted/40 transition-colors">
-      <td className="px-4 py-3 text-sm font-medium">{booking.guest?.name ?? "—"}</td>
-      <td className="px-4 py-3 text-sm text-muted-foreground">{booking.guest?.email ?? "—"}</td>
-      <td className="px-4 py-3 text-sm">{booking.propertyName}</td>
+      <td className="px-4 py-3 text-sm font-medium">{booking.user?.name ?? "—"}</td>
+      <td className="px-4 py-3 text-sm text-muted-foreground">{booking.user?.email ?? "—"}</td>
+      <td className="px-4 py-3 text-sm">{booking.property?.name ?? "—"}</td>
       <td className="px-4 py-3 text-sm">{formatDate(booking.checkIn)}</td>
       <td className="px-4 py-3 text-sm">{formatDate(booking.checkOut)}</td>
       <td className="px-4 py-3 text-sm">{formatCurrency(booking.totalAmount)}</td>
