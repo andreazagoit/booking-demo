@@ -2,6 +2,7 @@ import {
   DynamoDBClient,
   CreateTableCommand,
   DeleteTableCommand,
+  ListTablesCommand,
   ResourceNotFoundException,
   BillingMode,
 } from "@aws-sdk/client-dynamodb"
@@ -17,6 +18,21 @@ const DEMO_USERS = [
   { email: "guest2@demo.com", password: "demo1234", name: "Sara Mancini", role: "guest" as const },
 ]
 
+async function waitForDynamoDB(client: DynamoDBClient, retries = 10, delayMs = 2000): Promise<void> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await client.send(new ListTablesCommand({}))
+      return
+    } catch {
+      if (i < retries - 1) {
+        console.log(`[instrumentation] DynamoDB not ready, retrying in ${delayMs}ms... (${i + 1}/${retries})`)
+        await new Promise((r) => setTimeout(r, delayMs))
+      }
+    }
+  }
+  throw new Error(`[instrumentation] DynamoDB not reachable after ${retries} retries`)
+}
+
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return
 
@@ -28,6 +44,7 @@ export async function register() {
   })
 
   console.log("[instrumentation] Starting database seed...")
+  await waitForDynamoDB(client)
 
   const AUTH_TABLE_PREFIX = process.env.AUTH_TABLE_PREFIX ?? "auth_"
   const AUTH_TABLES = ["user", "session", "account", "verification"].map(

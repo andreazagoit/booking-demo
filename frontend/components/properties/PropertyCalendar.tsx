@@ -362,10 +362,9 @@ export function PropertyCalendar(props: Props) {
   const [selected, setSelected] = useState<Booking | null>(null)
 
   // ── Owner mode data ────────────────────────────────────────────────────────
-  const ownerBookings = props.mode === "view" ? props.bookings : []
+  const viewBookings  = props.mode === "view" ? props.bookings : undefined
   const propertyId    = props.mode === "view" ? props.propertyId : ""
-
-  // Default month: first future booking, or today
+  const ownerBookings = useMemo(() => viewBookings ?? [], [viewBookings])
   const initialMonth = useMemo(() => {
     if (props.mode === "view") {
       const today = getToday()
@@ -393,7 +392,8 @@ export function PropertyCalendar(props: Props) {
   })
 
   // ── Guest mode data ────────────────────────────────────────────────────────
-  const bookedRanges = props.mode === "book" ? props.bookedRanges : []
+  const bookModeRanges = props.mode === "book" ? props.bookedRanges : undefined
+  const bookedRanges   = useMemo(() => bookModeRanges ?? [], [bookModeRanges])
 
   const bookedDays = useMemo(() => {
     const days: Date[] = []

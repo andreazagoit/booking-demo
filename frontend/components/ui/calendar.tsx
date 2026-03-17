@@ -40,7 +40,7 @@ function Calendar({
       locale={locale}
       formatters={{
         formatMonthDropdown: (date) =>
-          date.toLocaleString(locale?.code, { month: "short" }),
+          date.toLocaleString((locale as { code?: string } | undefined)?.code, { month: "short" }),
         ...formatters,
       }}
       classNames={{
@@ -184,7 +184,8 @@ function CalendarDayButton({
   className,
   day,
   modifiers,
-  locale,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  locale: _locale,
   ...props
 }: React.ComponentProps<typeof DayButton> & { locale?: Partial<Locale> }) {
   const defaultClassNames = getDefaultClassNames()

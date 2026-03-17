@@ -203,7 +203,7 @@ export default async function HomePage() {
           <div className="text-center max-w-2xl mx-auto space-y-3 mb-14">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Come funziona</h2>
             <p className="text-muted-foreground text-base sm:text-lg">
-              Dall'idea alla prenotazione in quattro passaggi semplici.
+              Dall&apos;idea alla prenotazione in quattro passaggi semplici.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -242,7 +242,7 @@ export default async function HomePage() {
                     </svg>
                   ))}
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">"{t.quote}"</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">&quot;{t.quote}&quot;</p>
                 <div>
                   <p className="text-sm font-semibold">{t.author}</p>
                   <p className="text-xs text-muted-foreground">{t.location}</p>

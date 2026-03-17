@@ -1,12 +1,11 @@
 import { notFound } from "next/navigation"
+import Image from "next/image"
 import { query } from "@/lib/apollo-client"
 import { GET_PROPERTY } from "@/lib/models/property/queries"
 import type { GetPropertyQuery } from "@/gql/graphql"
 import { BookingForm } from "@/components/properties/BookingForm"
 import { Container } from "@/components/ui/container"
 import { dbGetPropertyBookedRanges } from "@/lib/models/booking/operations"
-
-type Property = NonNullable<GetPropertyQuery["property"]>
 
 export default async function PropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -27,12 +26,13 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           {/* Left: details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Image */}
-            <div className="rounded-2xl overflow-hidden aspect-[16/9] bg-muted">
+            <div className="relative rounded-2xl overflow-hidden aspect-[16/9] bg-muted">
               {property.imageUrl ? (
-                <img
+                <Image
                   src={property.imageUrl}
                   alt={property.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">

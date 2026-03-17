@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useQuery } from "@apollo/client/react"
 import { GET_PROPERTY_BOOKINGS } from "@/lib/models/booking/queries"
 import { PropertyCalendar } from "./PropertyCalendar"
@@ -49,10 +50,11 @@ export function OwnerPropertyCard({ property }: { property: Property }) {
         {/* ── COL 1: immagine ── */}
         <div className="relative min-h-[220px] bg-muted overflow-hidden">
           {property.imageUrl ? (
-            <img
+            <Image
               src={property.imageUrl}
               alt={property.name}
-              className="absolute inset-0 w-full h-full object-cover"
+              fill
+              className="absolute inset-0 object-cover"
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/20">

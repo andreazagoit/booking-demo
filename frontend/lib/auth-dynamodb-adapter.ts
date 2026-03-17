@@ -1,4 +1,5 @@
 import { createAdapterFactory } from "better-auth/adapters"
+import type { CustomAdapter, CleanedWhere } from "@better-auth/core/db/adapter"
 import {
   PutCommand,
   GetCommand,
@@ -12,9 +13,7 @@ const TABLE_PREFIX = process.env.AUTH_TABLE_PREFIX ?? "auth_"
 
 const tbl = (model: string) => `${TABLE_PREFIX}${model}`
 
-type WhereClause = { field: string; value: unknown; operator?: string }
-
-function buildFilter(where: WhereClause[]) {
+function buildFilter(where: CleanedWhere[]) {
   const parts: string[] = []
   const names: Record<string, string> = {}
   const values: Record<string, unknown> = {}
@@ -31,7 +30,7 @@ function buildFilter(where: WhereClause[]) {
   return { expression: parts.join(" AND "), names, values }
 }
 
-async function scan(model: string, where?: WhereClause[]): Promise<Record<string, unknown>[]> {
+async function scan(model: string, where?: CleanedWhere[]): Promise<Record<string, unknown>[]> {
   if (!where || where.length === 0) {
     const r = await docClient.send(new ScanCommand({ TableName: tbl(model) }))
     return (r.Items ?? []) as Record<string, unknown>[]
@@ -46,7 +45,7 @@ async function scan(model: string, where?: WhereClause[]): Promise<Record<string
   return (r.Items ?? []) as Record<string, unknown>[]
 }
 
-async function findOne(model: string, where: WhereClause[]): Promise<Record<string, unknown> | null> {
+async function findOne(model: string, where: CleanedWhere[]): Promise<Record<string, unknown> | null> {
   if (where.length === 1 && where[0].field === "id" && !where[0].operator) {
     const r = await docClient.send(new GetCommand({ TableName: tbl(model), Key: { id: where[0].value } }))
     return (r.Item as Record<string, unknown>) ?? null
@@ -65,22 +64,21 @@ export const dynamodbAdapter = () =>
       supportsDates: false,
       supportsBooleans: false,
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    adapter: () => ({
-      create: async ({ model, data }: { model: string; data: Record<string, unknown>; select?: string[] }) => {
+    adapter: (): CustomAdapter => ({
+      create: async ({ model, data }) => {
         await docClient.send(new PutCommand({ TableName: tbl(model), Item: data }))
-        return data as any
+        return data
       },
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      update: async ({ model, where, update }: any) => {
+      update: async <T>({ model, where, update }: { model: string; where: CleanedWhere[]; update: T }): Promise<T | null> => {
         const existing = await findOne(model, where)
-        if (!existing) return null as any
-        const keys = Object.keys(update)
-        if (!keys.length) return existing as any
+        if (!existing) return null
+        const keys = Object.keys(update as Record<string, unknown>)
+        if (!keys.length) return existing as unknown as T
         const setExpr = keys.map((k, i) => `#u${i} = :u${i}`).join(", ")
+        const upd = update as Record<string, unknown>
         const exprNames = Object.fromEntries(keys.map((k, i) => [`#u${i}`, k]))
-        const exprValues = Object.fromEntries(keys.map((k, i) => [`:u${i}`, update[k]]))
+        const exprValues = Object.fromEntries(keys.map((k, i) => [`:u${i}`, upd[k]]))
         const r = await docClient.send(new UpdateCommand({
           TableName: tbl(model),
           Key: { id: existing.id },
@@ -89,10 +87,10 @@ export const dynamodbAdapter = () =>
           ExpressionAttributeValues: exprValues,
           ReturnValues: "ALL_NEW",
         }))
-        return (r.Attributes ?? null) as any
+        return (r.Attributes ?? null) as unknown as T | null
       },
 
-      updateMany: async ({ model, where, update }: { model: string; where: WhereClause[]; update: Record<string, unknown> }) => {
+      updateMany: async ({ model, where, update }) => {
         const items = await scan(model, where)
         for (const item of items) {
           const keys = Object.keys(update)
@@ -109,13 +107,13 @@ export const dynamodbAdapter = () =>
         return items.length
       },
 
-      delete: async ({ model, where }: { model: string; where: WhereClause[] }) => {
+      delete: async ({ model, where }) => {
         const existing = await findOne(model, where)
         if (!existing) return
         await docClient.send(new DeleteCommand({ TableName: tbl(model), Key: { id: existing.id } }))
       },
 
-      deleteMany: async ({ model, where }: { model: string; where: WhereClause[] }) => {
+      deleteMany: async ({ model, where }) => {
         const items = await scan(model, where)
         for (const item of items) {
           await docClient.send(new DeleteCommand({ TableName: tbl(model), Key: { id: item.id } }))
@@ -123,11 +121,11 @@ export const dynamodbAdapter = () =>
         return items.length
       },
 
-      findOne: async ({ model, where }: { model: string; where: WhereClause[]; select?: string[] }) => {
-        return (await findOne(model, where)) as any
+      findOne: async <T>({ model, where }: { model: string; where: CleanedWhere[]; select?: string[]; join?: unknown }): Promise<T | null> => {
+        return (await findOne(model, where)) as unknown as T | null
       },
 
-      findMany: async ({ model, where, limit, offset, sortBy }: { model: string; where?: WhereClause[]; limit?: number; offset?: number; sortBy?: { field: string; direction?: string }; select?: string[] }) => {
+      findMany: async <T>({ model, where, limit, offset, sortBy }: { model: string; where?: CleanedWhere[]; limit?: number; offset?: number; sortBy?: { field: string; direction?: "asc" | "desc" }; select?: string[]; join?: unknown }): Promise<T[]> => {
         let items = await scan(model, where)
         if (sortBy) {
           items = [...items].sort((a, b) => {
@@ -137,10 +135,10 @@ export const dynamodbAdapter = () =>
         }
         if (offset) items = items.slice(offset)
         if (limit) items = items.slice(0, limit)
-        return items as any
+        return items as unknown as T[]
       },
 
-      count: async ({ model, where }: { model: string; where?: WhereClause[] }) => {
+      count: async ({ model, where }) => {
         return (await scan(model, where)).length
       },
     }),

@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import type { GetPropertiesQuery } from "@/gql/graphql"
 
 type Property = GetPropertiesQuery["properties"][number]
@@ -16,10 +17,11 @@ export function PropertyCard({ property }: PropertyCardProps) {
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {property.imageUrl ? (
-          <img
+          <Image
             src={property.imageUrl}
             alt={property.name}
-            className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
+            fill
+            className="object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
