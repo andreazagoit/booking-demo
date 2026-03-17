@@ -2,11 +2,7 @@ import DataLoader from "dataloader"
 import { BatchGetCommand } from "@aws-sdk/lib-dynamodb"
 import { docClient } from "@/lib/dynamodb"
 import { PROPERTIES_TABLE, type PropertyItem } from "@/lib/models/property/operations"
-
-const AUTH_TABLE_PREFIX = process.env.AUTH_TABLE_PREFIX ?? "auth_"
-const AUTH_USER_TABLE = `${AUTH_TABLE_PREFIX}user`
-
-type UserRecord = { id: string; name: string; email: string; createdAt: string }
+import { AUTH_USER_TABLE, type UserRecord } from "@/lib/models/user/types"
 
 function createPropertyLoader() {
   return new DataLoader<string, PropertyItem | null>(async (ids) => {

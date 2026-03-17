@@ -3,24 +3,13 @@
 import { useMutation } from "@apollo/client/react"
 import { UPDATE_BOOKING_STATUS } from "@/lib/models/booking/queries"
 import { BookingStatus } from "@/gql/graphql"
+import { BOOKING_STATUS_LABEL, BOOKING_STATUS_CLASS } from "@/lib/constants/booking"
 import type { BookingNode } from "@/hooks/useBookings"
 
-const STATUS_LABELS: Record<BookingStatus, string> = {
-  [BookingStatus.Confirmed]: "Confermata",
-  [BookingStatus.Pending]: "In attesa",
-  [BookingStatus.Cancelled]: "Cancellata",
-}
-
-const STATUS_COLORS: Record<BookingStatus, string> = {
-  [BookingStatus.Confirmed]: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  [BookingStatus.Pending]: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-  [BookingStatus.Cancelled]: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-}
-
-function StatusBadge({ status }: { status: BookingStatus }) {
+export function StatusBadge({ status }: { status: BookingStatus }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[status]}`}>
-      {STATUS_LABELS[status]}
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${BOOKING_STATUS_CLASS[status]}`}>
+      {BOOKING_STATUS_LABEL[status]}
     </span>
   )
 }
@@ -65,9 +54,9 @@ export function BookingRow({ booking, onStatusChange }: BookingRowProps) {
           }
           className="text-xs rounded border border-input bg-background px-2 py-1 focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
         >
-          <option value={BookingStatus.Confirmed}>Conferma</option>
-          <option value={BookingStatus.Pending}>In attesa</option>
-          <option value={BookingStatus.Cancelled}>Cancella</option>
+          <option value={BookingStatus.Confirmed}>{BOOKING_STATUS_LABEL[BookingStatus.Confirmed]}</option>
+          <option value={BookingStatus.Pending}>{BOOKING_STATUS_LABEL[BookingStatus.Pending]}</option>
+          <option value={BookingStatus.Cancelled}>{BOOKING_STATUS_LABEL[BookingStatus.Cancelled]}</option>
         </select>
       </td>
     </tr>

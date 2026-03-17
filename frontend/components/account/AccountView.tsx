@@ -11,6 +11,7 @@ import { Container } from "@/components/ui/container"
 import { OwnerPropertyCard } from "@/components/properties/OwnerPropertyCard"
 import { BookingsTable } from "@/components/bookings/BookingsTable"
 import { BookingsFilters } from "@/components/bookings/BookingsFilters"
+import { StatusBadge } from "@/components/bookings/BookingRow"
 import { useBookings } from "@/hooks/useBookings"
 import { signOut } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
@@ -24,17 +25,6 @@ interface AccountViewProps {
   userEmail: string
   initialProperties: Property[]
   initialBookings: GuestBooking[]
-}
-
-const STATUS_LABEL: Record<string, string> = {
-  CONFIRMED: "Confermata",
-  PENDING: "In attesa",
-  CANCELLED: "Annullata",
-}
-const STATUS_CLASS: Record<string, string> = {
-  CONFIRMED: "bg-green-100 text-green-700",
-  PENDING: "bg-amber-100 text-amber-700",
-  CANCELLED: "bg-red-100 text-red-600",
 }
 
 function NewPropertyModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
@@ -328,9 +318,7 @@ export function AccountView({ userName, userEmail, initialProperties, initialBoo
                     <td className="px-4 py-3 text-muted-foreground">{dayjs(b.checkOut).format("D MMM YYYY")}</td>
                     <td className="px-4 py-3 font-medium">€{b.totalAmount.toFixed(2)}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${STATUS_CLASS[b.status] ?? "bg-muted text-muted-foreground"}`}>
-                        {STATUS_LABEL[b.status] ?? b.status}
-                      </span>
+                      <StatusBadge status={b.status as BookingStatus} />
                     </td>
                   </tr>
                 ))}

@@ -42,20 +42,11 @@ export const GET_BOOKINGS = gql(`
   }
 `)
 
-// Fragment for owner: property card with all bookings nested
-export const OWNER_PROPERTY_FIELDS = gql(`
-  fragment OwnerPropertyFields on Property {
-    id
-    name
-    description
-    location
-    imageUrl
-    pricePerNight
-    createdAt
-  }
-`)
-
-export const OWNER_BOOKING_FIELDS = gql(`
+// These fragment declarations are required by graphql-codegen's typed gql() function:
+// the queries below reference ...OwnerBookingFields / ...GuestBookingFields and need the
+// fragment registered in this file for TypeScript to infer the correct return types.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _OWNER_BOOKING_FIELDS = gql(`
   fragment OwnerBookingFields on Booking {
     id
     checkIn
@@ -71,8 +62,8 @@ export const OWNER_BOOKING_FIELDS = gql(`
   }
 `)
 
-// Fragment for guest: booking with minimal property info
-export const GUEST_BOOKING_FIELDS = gql(`
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _GUEST_BOOKING_FIELDS = gql(`
   fragment GuestBookingFields on Booking {
     id
     checkIn
@@ -84,14 +75,6 @@ export const GUEST_BOOKING_FIELDS = gql(`
       id
       name
       location
-    }
-  }
-`)
-
-export const GET_MY_PROPERTIES_OWNER = gql(`
-  query GetMyPropertiesOwner {
-    myProperties {
-      ...OwnerPropertyFields
     }
   }
 `)
@@ -108,19 +91,6 @@ export const GET_MY_BOOKINGS = gql(`
   query GetMyBookings {
     myBookings {
       ...GuestBookingFields
-    }
-  }
-`)
-
-export const GET_OWNER_BOOKINGS = gql(`
-  query GetOwnerBookings {
-    ownerBookings {
-      ...OwnerBookingFields
-      property {
-        id
-        name
-        location
-      }
     }
   }
 `)

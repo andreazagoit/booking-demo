@@ -43,7 +43,7 @@ export function Footer() {
             <ul className="space-y-2.5">
               {[
                 { href: "/account", label: "Le mie proprietà" },
-                { href: "/bookings", label: "Prenotazioni" },
+                { href: "/account", label: "Prenotazioni" },
                 { href: "/account", label: "Aggiungi struttura" },
               ].map((link) => (
                 <li key={link.label}>

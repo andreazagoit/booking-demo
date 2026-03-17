@@ -2,17 +2,14 @@ import { ScanCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb"
 import { docClient } from "@/lib/dynamodb"
 import { dbGetProperty, PROPERTIES_TABLE } from "@/lib/models/property/operations"
 import type { CreateBookingInput } from "@/lib/models/booking/validator"
+import { randomId } from "@/lib/utils"
 
 export type BookingStatus = "CONFIRMED" | "PENDING" | "CANCELLED"
 
 export const BOOKINGS_TABLE = process.env.BOOKINGS_TABLE ?? "bookings"
 
-function randomId(): string {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36)
-}
-
-// Internal DynamoDB item shape — not exported, use GraphQL types on the client
-interface BookingItem {
+// Internal DynamoDB item shape
+export interface BookingItem {
   id: string
   userId: string
   propertyId: string

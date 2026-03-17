@@ -1,11 +1,8 @@
 import { GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb"
 import { docClient } from "@/lib/dynamodb"
+import { randomId } from "@/lib/utils"
 
 export const PROPERTIES_TABLE = process.env.PROPERTIES_TABLE ?? "properties"
-
-function randomId(): string {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36)
-}
 
 export interface CreatePropertyInput {
   name: string

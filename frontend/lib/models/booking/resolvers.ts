@@ -9,31 +9,13 @@ import {
   dbGetOwnerBookings,
   dbGetBookingsPaginated,
   type BookingStatus,
+  type BookingItem,
+  type BookingsQueryArgs,
 } from "./operations"
 
 interface UpdateBookingStatusArgs {
   id: string
   status: BookingStatus
-}
-
-// Internal booking shape from DynamoDB (has userId/propertyId as raw keys)
-interface BookingRecord {
-  id: string
-  userId: string
-  propertyId: string
-  checkIn: string
-  checkOut: string
-  status: BookingStatus
-  totalAmount: number
-  createdAt: string
-}
-
-interface BookingsArgs {
-  first?: number | null
-  after?: string | null
-  from?: string | null
-  to?: string | null
-  status?: BookingStatus | null
 }
 
 export const bookingResolvers = {
@@ -53,7 +35,7 @@ export const bookingResolvers = {
       const user = requireAuth(context)
       return dbGetOwnerBookings(user.id)
     },
-    bookings: (_: unknown, args: BookingsArgs, context: GraphQLContext) => {
+    bookings: (_: unknown, args: Omit<BookingsQueryArgs, "ownerId">, context: GraphQLContext) => {
       const user = requireAuth(context)
       return dbGetBookingsPaginated({ ...args, ownerId: user.id })
     },
@@ -77,10 +59,10 @@ export const bookingResolvers = {
 
   // Field resolvers — batched via DataLoader (no N+1)
   Booking: {
-    property: (booking: BookingRecord, _: unknown, context: GraphQLContext) => {
+    property: (booking: BookingItem, _: unknown, context: GraphQLContext) => {
       return context.loaders.property.load(booking.propertyId)
     },
-    user: (booking: BookingRecord, _: unknown, context: GraphQLContext) => {
+    user: (booking: BookingItem, _: unknown, context: GraphQLContext) => {
       return context.loaders.user.load(booking.userId)
     },
   },
